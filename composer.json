@@ -1,0 +1,19 @@
+{
+    "name": "alirezax5/adsgram-php",
+    "description": "for adsgram.ai",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "alirezax5\\adsgramPhp\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "alirezax5",
+            "email": "alirezaaghax6@gmail.com"
+        }
+    ],
+    "require": {
+        "guzzlehttp/guzzle": "^7.10"
+    }
+}
