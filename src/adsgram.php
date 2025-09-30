@@ -45,9 +45,9 @@ class adsgram
         }
     }
 
-    public function advbot($blockid, $tgid)
+    public function advbot($blockid, $tgid, $language = null)
     {
-        $req = $this->request('advbot', compact('blockid', 'tgid'));
+        $req = $this->request('advbot', compact('blockid', 'tgid', 'language'));
         if ($req == 'No available advertisement at the moment, try again later!')
             return false;
 
