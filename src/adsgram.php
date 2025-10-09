@@ -9,7 +9,7 @@ class adsgram
     public $url = 'https://api.adsgram.ai/';
     private $httpClient;
 
-    public function __construct()
+    public function __construct($httpClient = null)
     {
         $this->httpClient = $httpClient ?? new GuzzleClient(['verify' => false]);
     }
@@ -20,7 +20,6 @@ class adsgram
             'headers' => ['User-Agent' => 'adsgramPhp script'],
         ];
 
-        // Build URL with query parameters if they exist
         $requestUrl = $this->url . $type;
         if (!empty($query)) {
             $requestUrl .= '?' . http_build_query($query);
@@ -33,23 +32,35 @@ class adsgram
         try {
             $response = $this->httpClient->request($method, $requestUrl, $options);
             if ($response->getStatusCode() !== 200) {
-                throw new \Exception('HTTP error: ' . $response->getStatusCode());
+                return 'HTTP error: ' . $response->getStatusCode();
             }
-            $data = json_decode($response->getBody()->getContents(), true);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                throw new \Exception('JSON decode error: ' . json_last_error_msg());
+
+            $contents = $response->getBody()->getContents();
+
+            // اگر JSON معتبر بود، برگردونیم
+            $data = json_decode($contents, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                return $data;
             }
-            return $data;
-        } catch (\Throwable $e) {
-            throw new \Exception('Request failed: ' . $e->getMessage(), 0, $e);
+
+            // اگر متن ساده بود، همون متن رو برگردونیم
+            return trim($contents);
+
+        } catch (\Exception $e) {
+            return 'Request failed: ' . $e->getMessage();
         }
     }
 
     public function advbot($blockid, $tgid, $language = null)
     {
+        error_log(123);
+
         $req = $this->request('advbot', compact('blockid', 'tgid', 'language'));
-        if ($req == 'No available advertisement at the moment, try again later!')
+        error_log(print_r($req,true));
+        // اگر متن خاص تبلیغ نبود، متن رو نمایش بده
+        if (is_string($req) && stripos($req, 'No available advertisement') !== false) {
             return false;
+        }
 
         return $req;
     }
