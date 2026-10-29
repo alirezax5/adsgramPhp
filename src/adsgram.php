@@ -8,9 +8,10 @@ class adsgram
 {
     public $url = 'https://api.adsgram.ai/';
     private $httpClient;
-
-    public function __construct($httpClient = null)
+    private $token;
+    public function __construct($httpClient = null ,$token )
     {
+        $this->token = $token;
         $this->httpClient = $httpClient ?? new GuzzleClient(['verify' => false]);
     }
 
@@ -21,29 +22,31 @@ class adsgram
         ];
 
         $requestUrl = $this->url . $type;
+        $query['token'] = $this->token;
+
         if (!empty($query)) {
             $requestUrl .= '?' . http_build_query($query);
         }
-
+        ;
         if ($method === 'POST') {
             $options['form_params'] = $body;
         }
 
         try {
             $response = $this->httpClient->request($method, $requestUrl, $options);
+
             if ($response->getStatusCode() !== 200) {
+
                 return 'HTTP error: ' . $response->getStatusCode();
             }
 
             $contents = $response->getBody()->getContents();
 
-            // اگر JSON معتبر بود، برگردونیم
             $data = json_decode($contents, true);
             if (json_last_error() === JSON_ERROR_NONE) {
                 return $data;
             }
 
-            // اگر متن ساده بود، همون متن رو برگردونیم
             return trim($contents);
 
         } catch (\Exception $e) {
@@ -53,15 +56,15 @@ class adsgram
 
     public function advbot($blockid, $tgid, $language = null)
     {
-        error_log(123);
 
         $req = $this->request('advbot', compact('blockid', 'tgid', 'language'));
-        error_log(print_r($req,true));
-        // اگر متن خاص تبلیغ نبود، متن رو نمایش بده
+        print_r($req);
         if (is_string($req) && stripos($req, 'No available advertisement') !== false) {
             return false;
         }
-
+        if (is_string($req) && stripos($req, 'No available advertisement') !== false) {
+            return false;
+        }
         return $req;
     }
 }
